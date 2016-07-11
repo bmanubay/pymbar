@@ -280,6 +280,8 @@ for n in range(nBoots_work):
  	for k in range(K):
  		E_kln[:,k,:]*=beta_k[k]**(-1)  # get the 'unreduced' potential -- we can't take differences of reduced potentials because the beta is different.
 	(E_expect, dE_expect) = mbar.computeExpectations(E_kln, state_dependent = True)
+	#print(E_expect.shape)
+	#print(Temp_k.shape)
 	allE_expect[:,n] = E_expect[:]
         # expectations for the differences, which we need for numerical derivatives
 	(DeltaE_expect, dDeltaE_expect) = mbar.computeExpectations(E_kln,output='differences', state_dependent = True)
@@ -287,10 +289,10 @@ for n in range(nBoots_work):
         print "Computing Expectations for E^2..."
         (E2_expect,dE2_expect) = mbar.computeExpectations(E_kln**2, state_dependent = True)
 	allE2_expect[:,n] = E2_expect[:]
-
+	#print(E2_expect)
 	# get the free energies
-	(df_ij) = mbar.getFreeEnergyDifferences()
-	print(df_ij.shape)
+	df_ij = mbar.getFreeEnergyDifferences()
+	#print(df_ij)
 	#(df_ij, ddf_ij) = mbar.getFreeEnergyDifferences()
 
         #------------------------------------------------------------------------
@@ -308,13 +310,13 @@ for n in range(nBoots_work):
 	# However, dE_expect**2 is already an estimator of sigma^2/(n-1) 
 	# Cv = sigma^2/kT^2, so d(Cv) = d(sigma^2)/kT^2 = sigma^2*[sqrt(2/(n-1)]/kT^2
 	# we just need an estimate of n-1, but we can get that by var(dE)/dE_expect**2  
-
-	allCv_expect[:,0,n] = (E2_expect - (E_expect*E_expect)) / ( kB * Temp_k**2)
-
+	
+	#allCv_expect[:,0,n] = (E2_expect - (E_expect*E_expect)) / ( kB * Temp_k**2)
+	allCv_expect = (E2_expect - (E_expect*E_expect)) / ( kB * Temp_k**2)	
 	if (n==0):
 		N_eff = (E2_expect - (E_expect*E_expect))/dE_expect**2  # sigma^2 / (sigma^2/n) = effective number of samples
-		dCv_expect[:,0] = allCv_expect[:,0,n]*numpy.sqrt(2/N_eff)  
-
+		#dCv_expect[:,0] = allCv_expect[:,0,n]*numpy.sqrt(2/N_eff)  
+		dCv_expect = allCv_expect*numpy.sqrt(2/N_eff) 
 	for i in range(originalK,K):
 
                 ####################################
@@ -334,7 +336,6 @@ for n in range(nBoots_work):
 		if (i==K-1):
 			ip = i
 
-                ####################################
 		# C_v by first derivative	
 		####################################	
 
